@@ -191,6 +191,7 @@ export const CategoryView = React.memo(function CategoryView({ setCurrentView, a
                     <Heart className="w-5 h-5 fill-current border-none" />
                   </button>
                   <img 
+                    onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image"; }}
                     src={product.image || undefined} 
                     alt={product.name}
                     className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transform transition-transform duration-500 ease-out"

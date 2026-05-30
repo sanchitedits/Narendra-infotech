@@ -132,7 +132,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                   SHOP NOW <ChevronRight className="w-3 h-3 ml-1" />
                 </span>
               </div>
-              <img src={promo.img} alt={promo.title} className="w-24 h-24 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+              <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={promo.img} alt={promo.title} className="w-24 h-24 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
             </div>
           ))}
         </div>
@@ -154,7 +154,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                 >
                   <Heart className={`w-5 h-5 ${wishlist[product.id] ? 'fill-current' : ''}`} />
                 </button>
-                <img src={product.image || undefined} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transform transition-transform duration-500 ease-out" loading="lazy" />
+                <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={product.image || undefined} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transform transition-transform duration-500 ease-out" loading="lazy" />
                 <div className="absolute inset-x-0 bottom-4 translate-y-[150%] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transform transition-all duration-300 ease-out flex justify-center px-4 z-20">
                   <button onClick={(e) => { e.stopPropagation(); addToCart(product); }} className="bg-black/90 backdrop-blur text-white font-medium rounded py-2 px-6 text-sm hover:bg-black active:scale-95 transition-all w-full shadow-lg">
                     Quick Add
@@ -179,7 +179,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
              <span>STARTING AT</span>
              <span className="text-3xl font-light text-gray-900 ml-3">$950</span>
           </div>
-          <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=80" alt="Xiaomi Book Air" className="max-h-80 mx-auto object-contain mix-blend-multiply" />
+          <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=80" alt="Xiaomi Book Air" className="max-h-80 mx-auto object-contain mix-blend-multiply" />
         </div>
       </div>
       
@@ -201,7 +201,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                      >
                        <Heart className={`w-4 h-4 ${wishlist[product.id] ? 'fill-current' : ''}`} />
                      </button>
-                     <img src={product.image || undefined} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
+                     <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={product.image || undefined} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
                    </div>
                    <div className="flex flex-col mt-auto">
                      <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate">{product.name}</h3>
@@ -223,7 +223,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                 </button>
                 
                 <div className="w-full h-64 mb-8 relative flex justify-center items-center">
-                   <img src={products[(10 % products.length)].image || undefined} alt={products[(10 % products.length)].name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
+                   <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={products[(10 % products.length)].image || undefined} alt={products[(10 % products.length)].name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
                 </div>
                 <div className="text-center w-full">
                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{products[(10 % products.length)].name}</h3>
@@ -256,7 +256,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                      >
                        <Heart className={`w-4 h-4 ${wishlist[product.id] ? 'fill-current' : ''}`} />
                      </button>
-                     <img src={product.image || undefined} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
+                     <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={product.image || undefined} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
                    </div>
                    <div className="flex flex-col mt-auto">
                      <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate">{product.name}</h3>
@@ -278,7 +278,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                 <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">WEEKEND SALE</p>
                 <p className="text-5xl font-light text-gray-900">20%</p>
               </div>
-              <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="Camera" className="w-48 h-48 mix-blend-multiply object-contain z-0 group-hover:scale-105 transition-transform duration-500" />
+              <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80" alt="Camera" className="w-48 h-48 mix-blend-multiply object-contain z-0 group-hover:scale-105 transition-transform duration-500" />
            </div>
            
            <div className="bg-[#f8f9fa] rounded-lg p-10 flex flex-col sm:flex-row items-center justify-between overflow-hidden cursor-pointer group hover:bg-gray-100 transition-colors">
@@ -288,7 +288,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                 <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">DISCOUNT -30%</p>
                 <p className="text-5xl font-light text-gray-900">$349</p>
               </div>
-              <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&q=80" alt="Headphones" className="w-48 h-48 mix-blend-multiply object-contain z-0 group-hover:scale-105 transition-transform duration-500" />
+              <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&q=80" alt="Headphones" className="w-48 h-48 mix-blend-multiply object-contain z-0 group-hover:scale-105 transition-transform duration-500" />
            </div>
         </div>
       </div>
@@ -299,15 +299,15 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
            
            {[
-             { title: "Smartphones\nAnd Tablets", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&q=80", links: ["Accessories", "Action Games", "Game Consoles", "Racing Games", "Station Consoles", "TV & Audio"] },
-             { title: "Headphones\n", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80", links: ["Accessories", "Action Games", "Game Consoles", "Racing Games", "Station Consoles", "TV & Audio"] },
-             { title: "Video games\n& Consoles", img: "https://images.unsplash.com/photo-1486401899868-0e435ed85128?w=200&q=80", links: ["Accessories", "Action Games", "Game Consoles", "Racing Games", "Station Consoles", "TV & Audio"] },
-             { title: "Home Entertainment\n", img: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=200&q=80", links: ["Accessories", "Action Games", "Game Consoles", "Racing Games", "Station Consoles", "TV & Audio"] }
+             { title: "Streaming Devices", img: "https://images.unsplash.com/photo-1593784991095-a205069470b6?w=200&q=80", links: ["Fire TV Sticks", "Media Players", "Set Top Boxes", "TV Boxes", "Chromecast", "Apple TV"] },
+             { title: "Accessories", img: "https://images.unsplash.com/photo-1523206489230-c012c64b2b48?w=200&q=80", links: ["HDMI Cables", "Power Adapters", "Remote Controls", "Mounts", "Cases", "Batteries"] },
+             { title: "Digital Assets", img: "https://images.unsplash.com/photo-1614729939124-032f0b5609ce?w=200&q=80", links: ["OS Licenses", "Game Keys", "Software Keys", "Gift Cards", "Subscriptions", "Antivirus"] },
+             { title: "Audio Systems", img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=200&q=80", links: ["Soundbars", "Home Theaters", "Smart Speakers", "Bluetooth Audio", "Subwoofers", "Receivers"] }
            ].map((cat, idx) => (
               <div key={idx} className="flex flex-col">
                  <div className="flex items-center space-x-4 mb-6">
                    <div className="w-14 h-14 bg-[#f8f9fa] rounded-md flex items-center justify-center p-2 flex-shrink-0">
-                     <img src={cat.img} alt={cat.title} className="w-full h-full object-cover mix-blend-multiply rounded" />
+                     <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={cat.img} alt={cat.title} className="w-full h-full object-cover mix-blend-multiply rounded" />
                    </div>
                    <h3 className="font-semibold text-base text-gray-900 whitespace-pre-wrap leading-tight">{cat.title}</h3>
                  </div>
@@ -351,7 +351,7 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
            ].map((post, idx) => (
              <div key={idx} className="group cursor-pointer flex flex-col">
                <div className="w-full h-56 bg-gray-100 rounded-lg overflow-hidden mb-5">
-                 <img src={post.img} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                 <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={post.img} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                </div>
                <div className="text-[10px] text-gray-400 mb-2 uppercase tracking-wider font-semibold">
                  {post.date} <span className="mx-2 font-light">|</span> {post.cat}

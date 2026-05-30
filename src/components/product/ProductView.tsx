@@ -115,6 +115,7 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
                 className={`aspect-square p-2 rounded-md bg-white border-2 transition-colors ${i === activeImageIndex ? 'border-blue-600' : 'border-gray-100 hover:border-gray-300 opacity-70 hover:opacity-100'} cursor-pointer`}
               >
                   <img 
+                  onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image"; }}
                   src={img || undefined} 
                   alt={`${currentProduct.name} ${i}`}
                   className="w-full h-full object-contain mix-blend-multiply"
@@ -138,9 +139,16 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
                 </div>
               </div>
             </div>
-            <p className="text-gray-500 leading-relaxed text-sm md:text-base">
-              {currentProduct.description || 'Engineered for deep focus. These premium over-ear headphones deliver industry-leading noise cancellation, crystal-clear audio, and a minimalist design that looks as good as it sounds. Includes a minimal protective case.'}
-            </p>
+            {currentProduct.description ? (
+              <div 
+                className="text-gray-500 leading-relaxed text-sm md:text-base line-clamp-4 md:line-clamp-none [&>p:not(:last-child)]:mb-3"
+                dangerouslySetInnerHTML={{ __html: currentProduct.description }}
+              />
+            ) : (
+              <p className="text-gray-500 leading-relaxed text-sm md:text-base line-clamp-4 md:line-clamp-none">
+                Engineered for deep focus. These premium over-ear headphones deliver industry-leading noise cancellation, crystal-clear audio, and a minimalist design that looks as good as it sounds. Includes a minimal protective case.
+              </p>
+            )}
           </div>
 
           {currentProduct.variants && currentProduct.variants.length > 0 && (
@@ -263,6 +271,7 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
                   <Heart className={`w-5 h-5 border-none ${wishlist[product.id] ? 'fill-current' : ''}`} />
                 </button>
                 <img 
+                  onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image"; }}
                   src={product.image || undefined} 
                   alt={product.name}
                   className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transform transition-transform duration-500 ease-out"

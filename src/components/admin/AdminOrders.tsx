@@ -336,7 +336,7 @@ const handleRefund = async () => {
                       <div key={item.id} className="flex gap-4 items-center border border-gray-100 rounded-lg p-3">
                         <div className="w-16 h-16 bg-gray-50 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
                           {item.productImage ? (
-                            <img src={item.productImage} alt={item.productName} className="w-full h-full object-contain mix-blend-multiply p-1" />
+                            <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={item.productImage} alt={item.productName} className="w-full h-full object-contain mix-blend-multiply p-1" />
                           ) : (
                             <Package className="w-6 h-6 text-gray-400" />
                           )}

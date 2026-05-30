@@ -177,7 +177,7 @@ export function AdminProducts({ currentView, setCurrentView }: AdminProductsProp
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-gray-100 rounded flex-shrink-0">
-                          <img src={product.image || undefined} alt={product.name} className="w-full h-full object-cover mix-blend-multiply p-1" />
+                          <img onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image" }}  src={product.image || undefined} alt={product.name} className="w-full h-full object-cover mix-blend-multiply p-1" />
                         </div>
                         <span className="font-medium text-gray-900">{product.name}</span>
                       </div>

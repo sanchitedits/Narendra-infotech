@@ -22,6 +22,7 @@ export function AboutView({ setCurrentView }: AboutViewProps) {
         
         <div className="w-full h-[400px] bg-[#f1f3f5] mb-12 overflow-hidden">
           <img 
+            onError={(e) => { e.currentTarget.src = "https://placehold.co/600x600/f3f4f6/9ca3af?text=No+Image"; }}
             src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200&q=80" 
             alt="Office" 
             className="w-full h-full object-cover mix-blend-multiply" 
