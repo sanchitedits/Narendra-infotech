@@ -17,6 +17,7 @@ export function AdminProducts({ currentView, setCurrentView }: AdminProductsProp
   const itemsPerPage = 10;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
   // Form State
@@ -40,15 +41,20 @@ export function AdminProducts({ currentView, setCurrentView }: AdminProductsProp
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const currentProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      const success = await deleteProduct(id);
+  const confirmDelete = async () => {
+    if (deleteConfirmId !== null) {
+      const success = await deleteProduct(deleteConfirmId);
       if (success) {
         showToast('Product deleted successfully');
       } else {
         showToast('Failed to delete product');
       }
+      setDeleteConfirmId(null);
     }
+  };
+
+  const handleDelete = (id: number) => {
+    setDeleteConfirmId(id);
   };
 
   const openAddModal = () => {
@@ -288,6 +294,28 @@ export function AdminProducts({ currentView, setCurrentView }: AdminProductsProp
               </button>
               <button type="submit" form="productForm" className="px-4 py-2 bg-blue-600 rounded-md text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                 {editingProduct ? 'Save Changes' : 'Add Product'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirm Modal */}
+      {deleteConfirmId !== null && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm flex flex-col">
+            <div className="p-4 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900">Confirm Deletion</h3>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-gray-600">Are you sure you want to delete this product? This action cannot be undone.</p>
+            </div>
+            <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
+              <button onClick={() => setDeleteConfirmId(null)} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <button onClick={confirmDelete} className="px-4 py-2 bg-red-600 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-colors">
+                Delete
               </button>
             </div>
           </div>

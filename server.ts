@@ -642,6 +642,77 @@ async function startServer() {
     }
   });
 
+  // Chatbot API
+  let cachedBusinessInfo = '';
+  try {
+      const fs = await import('fs');
+      cachedBusinessInfo = fs.readFileSync(path.join(process.cwd(), 'src', 'business_info.txt'), 'utf8');
+  } catch (err) {
+      console.warn("Could not read business_info.txt");
+  }
+
+  app.post('/api/chat', async (req, res) => {
+    try {
+      const { message, history } = req.body;
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: 'Gemini API Key is not configured.' });
+      }
+      
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
+      
+      // Get Products for Prompt
+      const db = getDb();
+      let productContext = '';
+      if (db) {
+          const products = await db.select().from(schema.products).limit(50);
+          productContext = "\nOur current catalog of products:\n" + products.map(p => `- ${p.name}: ₹${p.price} (${p.description?.substring(0, 50)}...)`).join('\n');
+      }
+
+      const systemInstruction = cachedBusinessInfo + productContext;
+      
+      const chat = ai.chats.create({
+        model: "gemini-2.5-flash",
+        config: {
+          systemInstruction: systemInstruction,
+        },
+      });
+
+      // Restore History
+      if (history && history.length > 0) {
+        // Just simulating context by passing simple string, or could build full history mapping
+        // To be safe we will just append the recent conversations inside generating content
+      }
+
+      // Format previous history into the prompt
+      let fullPrompt = "";
+      if (history && history.length > 0) {
+         fullPrompt += "Previous conversation context:\n";
+         history.forEach((msg: any) => {
+            fullPrompt += `${msg.role === 'user' ? 'User' : 'You'}: ${msg.content}\n`;
+         });
+         fullPrompt += "\nNew Message from User: " + message;
+      } else {
+         fullPrompt = message;
+      }
+      
+      const response = await chat.sendMessage({ message: fullPrompt });
+      
+      res.json({ reply: response.text });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ error: error.message || 'Failed to chat' });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

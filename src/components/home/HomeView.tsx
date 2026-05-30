@@ -42,7 +42,7 @@ const slides = [
 ];
 
 export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart, viewProduct, viewCategory }: HomeViewProps) {
-  const { products } = useData();
+  const { products, isLoading } = useData();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [wishlist, setWishlist] = useState<Record<number, boolean>>({});
 
@@ -145,7 +145,15 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.slice(0, 8).map((product) => (
+          {isLoading ? (
+            Array(8).fill(0).map((_, i) => (
+              <div key={i} className="flex flex-col relative w-full border border-gray-100 rounded-lg p-4 bg-white animate-pulse">
+                <div className="w-full aspect-square bg-gray-200 rounded-md mb-4" />
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+              </div>
+            ))
+          ) : products.slice(0, 8).map((product) => (
             <div key={product.id} className="group cursor-pointer flex flex-col relative w-full border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors bg-white shadow-sm hover:shadow-md" onClick={() => viewProduct(product.id)}>
                <div className="w-full aspect-square bg-white rounded-md overflow-hidden relative mb-4">
                 <button 
@@ -189,8 +197,23 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
           <h2 className="text-2xl font-bold tracking-tight text-gray-900">Featured products</h2>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-           {/* Left column (2 items) */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="flex flex-col gap-6">
+              {Array(2).fill(0).map((_, i) => (
+                <div key={i} className="w-full border border-gray-100 rounded-lg p-4 bg-white animate-pulse flex-1 h-[256px]" />
+              ))}
+            </div>
+            <div className="lg:col-span-2 border border-gray-100 rounded-lg p-8 bg-white animate-pulse min-h-[400px]" />
+            <div className="flex flex-col gap-6">
+              {Array(2).fill(0).map((_, i) => (
+                <div key={i} className="w-full border border-gray-100 rounded-lg p-4 bg-white animate-pulse flex-1 h-[256px]" />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+             {/* Left column (2 items) */}
            <div className="flex flex-col gap-6">
              {products.slice(8, 10).map((product) => (
                 <div key={product.id} className="group cursor-pointer flex flex-col relative w-full border border-gray-100 rounded-lg p-4 bg-white shadow-sm hover:shadow-md flex-1" onClick={() => viewProduct(product.id)}>
@@ -265,7 +288,8 @@ export const HomeView = React.memo(function HomeView({ setCurrentView, addToCart
                 </div>
              ))}
            </div>
-        </div>
+         </div>
+        )}
       </div>
 
       {/* 6. Two Promo Banners */}

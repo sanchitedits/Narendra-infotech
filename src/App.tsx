@@ -16,6 +16,7 @@ import { PrivacyView } from './components/legal/PrivacyView';
 import { TermsView } from './components/legal/TermsView';
 import { CartDrawer } from './components/cart/CartDrawer';
 import { CheckoutView } from './components/checkout/CheckoutView';
+import { Chatbot } from './components/chat/Chatbot';
 
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminProducts } from './components/admin/AdminProducts';
@@ -137,6 +138,8 @@ export default function App() {
         setCurrentView={setCurrentView}
         viewProduct={viewProduct}
       />
+      
+      {!currentView.startsWith('admin-') && <Chatbot />}
     </div>
   );
 }

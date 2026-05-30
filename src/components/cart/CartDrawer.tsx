@@ -97,11 +97,19 @@ export const CartDrawer = React.memo(function CartDrawer({ isOpen, setIsOpen, ca
 
         {cartItems.length > 0 && (
           <div className="border-t border-gray-200 p-6 bg-gray-50">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-2">
               <span className="text-gray-600 font-medium">Subtotal</span>
-              <span className="font-bold text-gray-900 text-lg">₹{subtotal.toLocaleString('en-IN')}</span>
+              <span className="font-semibold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
             </div>
-            <p className="text-xs text-gray-500 mb-4">Shipping and taxes calculated at checkout.</p>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-gray-600 font-medium">Shipping (Delivery Charge)</span>
+              <span className="font-semibold text-gray-900">{subtotal > 15000 ? 'Free' : '₹500'}</span>
+            </div>
+            <div className="flex justify-between items-center mb-4 border-t border-gray-200/50 pt-3">
+              <span className="text-gray-900 font-bold">Total</span>
+              <span className="font-bold text-gray-900 text-lg">₹{(subtotal + (subtotal > 15000 ? 0 : 500)).toLocaleString('en-IN')}</span>
+            </div>
+            <p className="text-xs text-gray-500 mb-4 text-center">Taxes calculated at checkout.</p>
             <div className="flex flex-col gap-3">
               <button 
                 onClick={() => { setIsOpen(false); setCurrentView('checkout'); }}

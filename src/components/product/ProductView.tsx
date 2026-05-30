@@ -141,7 +141,7 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
             </div>
             {currentProduct.description ? (
               <div 
-                className="text-gray-500 leading-relaxed text-sm md:text-base line-clamp-4 md:line-clamp-none [&>p:not(:last-child)]:mb-3"
+                className="text-gray-500 leading-relaxed text-sm md:text-base max-h-64 overflow-y-auto pr-2 custom-scrollbar [&>p]:mb-3 [&>p:last-child]:mb-0"
                 dangerouslySetInnerHTML={{ __html: currentProduct.description }}
               />
             ) : (
