@@ -345,6 +345,11 @@ async function startServer() {
     }
   });
 
+  // Health check endpoint
+  app.get('/healthz', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // Get Config Status
   app.get('/api/config', (req, res) => {
     res.json({
