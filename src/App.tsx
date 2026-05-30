@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import JSZip from 'jszip';
-import { themeFiles } from './themeStore';
 import { useData } from './DataContext';
 import { ViewType, CartItem, Product } from './types';
 
@@ -25,7 +23,6 @@ import { AdminOrders } from './components/admin/AdminOrders';
 
 export default function App() {
   const { products } = useData();
-  const [isGenerating, setIsGenerating] = useState(false);
   const [currentView, setCurrentView] = useState<ViewType>('home'); 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
@@ -75,33 +72,6 @@ export default function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentView]);
-
-  const handleDownload = async () => {
-    setIsGenerating(true);
-    try {
-      const zip = new JSZip();
-      const themeFolder = zip.folder('electrostore-woocommerce-theme');
-      if (!themeFolder) throw new Error("Could not create folder structure.");
-
-      Object.entries(themeFiles).forEach(([filename, content]) => {
-        themeFolder.file(filename, content);
-      });
-
-      const blob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'electrostore-woocommerce-theme.zip';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Failed to generate zip", error);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   const currentProduct = products.find(p => p.id === selectedProductId) || products[0] || null;
 
@@ -160,21 +130,6 @@ export default function App() {
         setCurrentView={setCurrentView}
         viewProduct={viewProduct}
       />
-
-      {/* Bottom Banner indicating preview & export */}
-      <div className="bg-gray-900 text-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between text-sm mt-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <div className="mb-2 sm:mb-0">
-          <span className="font-bold mr-2">Preview Mode:</span> 
-          Minimalist Electronics Layout ({currentView === 'home' ? 'Homepage' : currentView === 'category' ? 'Category Page' : 'Product Page'})
-        </div>
-        <button 
-          onClick={handleDownload}
-          disabled={isGenerating}
-          className="bg-white text-gray-900 px-4 py-1.5 rounded font-medium hover:bg-gray-100 transition-colors disabled:opacity-50"
-        >
-          {isGenerating ? 'Packaging...' : 'Export to WooCommerce'}
-        </button>
-      </div>
     </div>
   );
 }

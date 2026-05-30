@@ -146,7 +146,7 @@ export function AdminOrders({ currentView, setCurrentView }: AdminOrdersProps) {
         </div>
         
         <div className="p-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <span className="text-center sm:text-left">Showing 1 to {filteredOrders.length} of {allOrders.length} results</span>
+          <span className="text-center sm:text-left">Showing 1 to {filteredOrders.length} of {orders.length} results</span>
           <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
             <button className="flex-1 sm:flex-none px-3 py-1 border border-gray-200 rounded text-gray-400 cursor-not-allowed">Previous</button>
             <button className="flex-1 sm:flex-none px-3 py-1 border border-gray-200 rounded hover:bg-blue-50 hover:text-blue-600 text-gray-900">Next</button>
