@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, ChevronLeft, ChevronDown, Star, Heart, Filter, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronDown, Heart, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useData } from '../../DataContext';
 import { ViewType, Product } from '../../types';
@@ -9,9 +9,11 @@ interface CategoryViewProps {
   setCurrentView: (view: ViewType) => void;
   addToCart: (product: Product) => void;
   viewProduct: (id: number) => void;
+  selectedCategory: string | null;
+  setSelectedCategory: (c: string | null) => void;
 }
 
-const FilterContent = ({ setIsFiltersOpen, categories }: { setIsFiltersOpen?: (v: boolean) => void, categories: any[] }) => (
+const FilterContent = ({ setIsFiltersOpen, categories, selectedCategory, setSelectedCategory }: { setIsFiltersOpen?: (v: boolean) => void, categories: any[], selectedCategory: string | null, setSelectedCategory: (c: string | null) => void }) => (
   <>
     <div className="flex justify-between items-center mb-6 md:hidden">
       <h2 className="text-xl font-bold text-gray-900">Filters</h2>
@@ -23,9 +25,22 @@ const FilterContent = ({ setIsFiltersOpen, categories }: { setIsFiltersOpen?: (v
     <div className="mb-8">
       <h3 className="font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">Categories</h3>
       <ul className="space-y-3">
+        <li className="flex justify-between items-center text-sm">
+          <button 
+            onClick={() => { setSelectedCategory(null); setIsFiltersOpen?.(false); }} 
+            className={`${selectedCategory === null ? 'text-gray-900 font-bold' : 'text-gray-500'} hover:text-gray-900 font-medium`}
+          >
+            All Products
+          </button>
+        </li>
         {categories.map((c, i) => (
           <li key={i} className="flex justify-between items-center text-sm">
-            <a href="#" className="text-gray-500 hover:text-gray-900 font-medium">{c.name}</a>
+            <button 
+              onClick={() => { setSelectedCategory(c.name); setIsFiltersOpen?.(false); }} 
+              className={`${selectedCategory === c.name ? 'text-gray-900 font-bold' : 'text-gray-500'} hover:text-gray-900 font-medium`}
+            >
+              {c.name}
+            </button>
             <span className="text-gray-400 bg-gray-100 px-2 py-0.5 rounded text-xs font-medium">{c.count?.split(' ')[0] || '0'}</span>
           </li>
         ))}
@@ -54,9 +69,11 @@ const FilterContent = ({ setIsFiltersOpen, categories }: { setIsFiltersOpen?: (v
   </>
 );
 
-export const CategoryView = React.memo(function CategoryView({ setCurrentView, addToCart, viewProduct }: CategoryViewProps) {
+export const CategoryView = React.memo(function CategoryView({ setCurrentView, addToCart, viewProduct, selectedCategory, setSelectedCategory }: CategoryViewProps) {
   const { products, categories } = useData();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  const displayedProducts = selectedCategory ? products.filter(p => p.category === selectedCategory) : products;
 
   useEffect(() => {
     if (isFiltersOpen) {
@@ -74,11 +91,11 @@ export const CategoryView = React.memo(function CategoryView({ setCurrentView, a
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6 w-full">
         <button onClick={() => setCurrentView('home')} className="hover:text-gray-900">Home</button>
         <ChevronRight className="w-3 h-3" />
-        <span className="text-gray-900 font-medium">All Products</span>
+        <span className="text-gray-900 font-medium">{selectedCategory || 'All Products'}</span>
       </nav>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 md:hidden">
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">All Products</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">{selectedCategory || 'All Products'}</h1>
         <button 
           onClick={() => setIsFiltersOpen(true)}
           className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-gray-100 border border-gray-200 rounded-lg text-gray-900 font-medium text-sm hover:bg-gray-200 transition-colors"
@@ -107,7 +124,7 @@ export const CategoryView = React.memo(function CategoryView({ setCurrentView, a
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                   className="fixed inset-y-0 left-0 bg-white z-50 w-4/5 max-w-sm p-6 overflow-y-auto flex-shrink-0 md:hidden shadow-xl"
                 >
-                   <FilterContent setIsFiltersOpen={setIsFiltersOpen} categories={categories} />
+                   <FilterContent setIsFiltersOpen={setIsFiltersOpen} categories={categories} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
                 </motion.aside>
               </>
             )}
@@ -117,14 +134,14 @@ export const CategoryView = React.memo(function CategoryView({ setCurrentView, a
 
         {/* Desktop Filters Aside */}
         <aside className="hidden md:block w-64 flex-shrink-0">
-          <FilterContent categories={categories} />
+          <FilterContent categories={categories} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
         </aside>
 
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 hidden md:flex">
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">All Products</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">{selectedCategory || 'All Products'}</h1>
             <div className="flex items-center gap-4 text-sm w-full sm:w-auto">
-              <span className="text-gray-500 whitespace-nowrap hidden sm:block">Showing 1-{products.length} of {products.length}</span>
+              <span className="text-gray-500 whitespace-nowrap hidden sm:block">Showing 1-{displayedProducts.length} of {displayedProducts.length}</span>
               <div className="relative w-full sm:w-auto">
                 <select className="appearance-none border border-gray-200 rounded-lg bg-gray-50 pl-4 pr-10 py-2.5 text-sm text-gray-900 outline-none w-full sm:w-auto focus:border-gray-900 focus:bg-white focus:ring-1 focus:ring-gray-900 font-medium cursor-pointer transition-colors active:scale-[0.98]">
                   <option>Sort by Featured</option>
@@ -140,7 +157,7 @@ export const CategoryView = React.memo(function CategoryView({ setCurrentView, a
           </div>
           
           <div className="flex items-center justify-between gap-4 text-sm w-full mb-6 md:hidden">
-             <span className="text-gray-500 whitespace-nowrap">1-{products.length} of {products.length} items</span>
+             <span className="text-gray-500 whitespace-nowrap">1-{displayedProducts.length} of {displayedProducts.length} items</span>
              <div className="relative w-1/2">
                 <select className="appearance-none border border-gray-200 rounded-lg bg-gray-50 pl-4 pr-8 py-2.5 text-sm text-gray-900 outline-none w-full focus:border-gray-900 focus:bg-white focus:ring-1 focus:ring-gray-900 font-medium cursor-pointer transition-colors active:scale-[0.98]">
                   <option>Featured</option>
@@ -162,7 +179,7 @@ export const CategoryView = React.memo(function CategoryView({ setCurrentView, a
               show: { opacity: 1, transition: { staggerChildren: 0.05 } }
             }}
           >
-            {products.map((product, idx) => (
+            {displayedProducts.map((product, idx) => (
               <motion.div 
                 key={idx} 
                 className="group cursor-pointer flex flex-col relative w-full" 
@@ -174,7 +191,7 @@ export const CategoryView = React.memo(function CategoryView({ setCurrentView, a
                     <Heart className="w-5 h-5 fill-current border-none" />
                   </button>
                   <img 
-                    src={product.image} 
+                    src={product.image || undefined} 
                     alt={product.name}
                     className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transform transition-transform duration-500 ease-out"
                     loading="lazy"

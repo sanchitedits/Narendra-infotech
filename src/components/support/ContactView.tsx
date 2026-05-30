@@ -1,12 +1,23 @@
-import React from 'react';
+import { useState } from 'react';
 import { ViewType } from '../../types';
-import { ChevronRight, Mail, MapPin, Phone } from 'lucide-react';
+import { ChevronRight, Mail, MapPin, Phone, CheckCircle2, Loader2 } from 'lucide-react';
 
 interface ContactViewProps {
   setCurrentView: (view: ViewType) => void;
 }
 
 export function ContactView({ setCurrentView }: ContactViewProps) {
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('submitting');
+    setTimeout(() => {
+      setStatus('success');
+      setTimeout(() => setStatus('idle'), 3000);
+    }, 1000);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-12 w-full">
@@ -62,27 +73,38 @@ export function ContactView({ setCurrentView }: ContactViewProps) {
 
         <div className="bg-white border border-gray-200 p-8 md:p-10 rounded-md">
           <h3 className="text-xl font-medium text-gray-900 mb-6">Send a Message</h3>
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Name</label>
-              <input type="text" className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600" placeholder="John Doe" />
+          
+          {status === 'success' ? (
+            <div className="bg-green-50 border border-green-200 rounded p-6 flex flex-col items-center justify-center text-center space-y-4 h-64">
+              <CheckCircle2 className="w-12 h-12 text-green-500" />
+              <div>
+                <h4 className="text-lg font-medium text-green-900 mb-1">Message Sent!</h4>
+                <p className="text-sm text-green-700">We'll get back to you within 24 hours.</p>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Email</label>
-              <input type="email" className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600" placeholder="john@example.com" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Order Number (Optional)</label>
-              <input type="text" className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600" placeholder="#123456" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Message</label>
-              <textarea className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-none h-32" placeholder="How can we help you?"></textarea>
-            </div>
-            <button className="w-full bg-blue-600 text-white font-medium rounded px-8 py-3 hover:bg-blue-700 transition-colors">
-              Submit Request
-            </button>
-          </form>
+          ) : (
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Name</label>
+                <input type="text" required className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600" placeholder="John Doe" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Email</label>
+                <input type="email" required className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600" placeholder="john@example.com" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Order Number (Optional)</label>
+                <input type="text" className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600" placeholder="#123456" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Message</label>
+                <textarea required className="w-full border border-gray-300 rounded px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-none h-32" placeholder="How can we help you?"></textarea>
+              </div>
+              <button disabled={status === 'submitting'} className="w-full bg-blue-600 flex justify-center items-center gap-2 disabled:bg-blue-400 text-white font-medium rounded px-8 py-3 hover:bg-blue-700 transition-colors">
+                {status === 'submitting' ? <><Loader2 className="w-5 h-5 animate-spin" /> Sending...</> : 'Submit Request'}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

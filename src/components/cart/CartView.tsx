@@ -56,7 +56,7 @@ export const CartView = React.memo(function CartView({ setCurrentView, cartItems
               <div key={item.id} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center pb-8 border-b border-gray-200">
                 <div className="col-span-1 sm:col-span-3 flex gap-6">
                   <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white border border-gray-100 rounded-md p-4 flex-shrink-0 cursor-pointer hover:border-gray-300 transition-colors" onClick={() => viewProduct(item.id)}>
-                    <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply transform-gpu transition-transform duration-300 hover:scale-105 will-change-transform" />
+                    <img src={item.image || undefined} alt={item.name} className="w-full h-full object-contain mix-blend-multiply transform-gpu transition-transform duration-300 hover:scale-105 will-change-transform" />
                   </div>
                   <div className="flex flex-col justify-center">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{item.category}</p>

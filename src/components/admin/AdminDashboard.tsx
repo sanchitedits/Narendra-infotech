@@ -1,55 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { AdminLayout } from './AdminLayout';
+import React, { useState } from 'react';
+import { AdminLayout, useAdminToast } from './AdminLayout';
 import { ViewType } from '../../types';
 import { TrendingUp, Users, ShoppingBag, DollarSign, ArrowUpRight, ArrowDownRight, MoreHorizontal, Database, Zap, Mail, Loader2, CheckCircle2, XCircle, Upload } from 'lucide-react';
+import { useData } from '../../DataContext';
 
 interface AdminDashboardProps {
   currentView: ViewType;
   setCurrentView: (view: ViewType) => void;
 }
 
-const stats = [
-  { name: 'Total Revenue', value: '₹4,52,318.90', change: '+20.1%', trend: 'up', icon: DollarSign },
-  { name: 'Total Orders', value: '356', change: '+12.5%', trend: 'up', icon: ShoppingBag },
-  { name: 'Active Customers', value: '2,845', change: '-4.2%', trend: 'down', icon: Users },
-  { name: 'Conversion Rate', value: '3.4%', change: '+1.2%', trend: 'up', icon: TrendingUp },
-];
-
-const recentOrders = [
-  { id: '#ORD-001', customer: 'Narendra', date: 'Today, 2:45 PM', total: '₹14,999', status: 'Processing' },
-  { id: '#ORD-002', customer: 'Shorya', date: 'Today, 1:12 PM', total: '₹3,999', status: 'Shipped' },
-  { id: '#ORD-003', customer: 'Gayatri', date: 'Today, 10:30 AM', total: '₹12,900', status: 'Delivered' },
-  { id: '#ORD-004', customer: 'Anuradha', date: 'Yesterday', total: '₹5,999', status: 'Processing' },
-  { id: '#ORD-005', customer: 'Tanu', date: 'Yesterday', total: '₹14,999', status: 'Shipped' },
-];
-
 export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardProps) {
-  const [config, setConfig] = useState({ database: false, resend: false, cashfree: false });
+  const { showToast } = useAdminToast();
+  const { analytics, config, isLoading: isLoadingAnalytics, refreshData } = useData();
   const [isSeeding, setIsSeeding] = useState(false);
   const [seedMessage, setSeedMessage] = useState<string | null>(null);
-  const [analytics, setAnalytics] = useState<{stats: any, recentOrders: any[]}>({
-    stats: { totalRevenue: 0, totalOrders: 0, activeCustomers: 0 },
-    recentOrders: []
-  });
   
   const [isImporting, setIsImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
-
-  useEffect(() => {
-    fetch('/api/config')
-      .then(res => res.json())
-      .then(data => setConfig(data))
-      .catch(console.error);
-      
-    fetch('/api/analytics')
-      .then(res => res.json())
-      .then(data => {
-          if (data.stats) {
-              setAnalytics({ stats: data.stats, recentOrders: data.recentOrders || [] });
-          }
-      })
-      .catch(console.error);
-  }, []);
 
   const handleSeedDatabase = async () => {
     setIsSeeding(true);
@@ -58,6 +25,9 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
       const res = await fetch('/api/seed', { method: 'POST' });
       const data = await res.json();
       setSeedMessage(data.message);
+      if (data.success) {
+        await refreshData();
+      }
     } catch (e) {
       setSeedMessage('Failed to seed database.');
     } finally {
@@ -84,6 +54,7 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
           const data = await res.json();
           if (data.success) {
              setImportMessage({ type: 'success', text: data.message });
+             await refreshData();
           } else {
              setImportMessage({ type: 'error', text: data.error || 'Import failed.' });
           }
@@ -104,8 +75,8 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
           <h2 className="text-2xl font-bold text-gray-900">Overview</h2>
           <p className="text-sm text-gray-500 mt-1">Here's what's happening with your store today.</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-none">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
             <select className="w-full sm:w-auto appearance-none border border-gray-200 bg-white text-sm rounded-md pl-4 pr-10 py-2 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 cursor-pointer transition-colors hover:border-gray-300">
               <option>Last 7 days</option>
               <option>Last 30 days</option>
@@ -116,36 +87,67 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
-          <button className="w-full sm:w-auto whitespace-nowrap bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-blue-700 transition-colors active:scale-[0.98]">
+          <button 
+            onClick={() => {
+               const csvHeader = "Metric,Value\n";
+               const csvData = [
+                 `Total Revenue,${analytics.stats.totalRevenue}`,
+                 `Total Orders,${analytics.stats.totalOrders}`,
+                 `Active Customers,${analytics.stats.activeCustomers}`
+               ].join("\n");
+               
+               const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvHeader + csvData);
+               const link = document.createElement("a");
+               link.setAttribute("href", encodedUri);
+               link.setAttribute("download", "dashboard_report.csv");
+               document.body.appendChild(link);
+               link.click();
+               document.body.removeChild(link);
+               showToast('Report downloaded');
+            }}
+            className="w-full sm:w-auto whitespace-nowrap bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-blue-700 transition-colors active:scale-[0.98]">
             Download Report
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {[
-          { name: 'Total Revenue', value: `₹${Number(analytics.stats.totalRevenue).toLocaleString()}`, change: '+0.0%', trend: 'up', icon: DollarSign },
-          { name: 'Total Orders', value: analytics.stats.totalOrders.toString(), change: '+0.0%', trend: 'up', icon: ShoppingBag },
-          { name: 'Active Customers', value: analytics.stats.activeCustomers.toString(), change: '+0.0%', trend: 'up', icon: Users },
-          { name: 'Conversion Rate', value: '3.4%', change: '+0.0%', trend: 'up', icon: TrendingUp }, // Currently mocked
-        ].map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div key={stat.name} className="bg-white p-6 rounded-md border border-gray-200">
+        {isLoadingAnalytics ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white p-6 rounded-md border border-gray-200 animate-pulse">
               <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-blue-50 rounded-md">
-                  <Icon className="w-5 h-5 text-blue-600" />
-                </div>
-                <span className={`flex items-center text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                  {stat.change}
-                  {stat.trend === 'up' ? <ArrowUpRight className="w-4 h-4 ml-1" /> : <ArrowDownRight className="w-4 h-4 ml-1" />}
-                </span>
+                <div className="w-9 h-9 bg-gray-200 rounded-md"></div>
+                <div className="w-12 h-5 bg-gray-200 rounded"></div>
               </div>
-              <h3 className="text-gray-500 text-sm font-medium mb-1">{stat.name}</h3>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+              <div className="w-24 h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="w-32 h-8 bg-gray-200 rounded"></div>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          [
+            { name: 'Total Revenue', value: `₹${Number(analytics.stats.totalRevenue).toLocaleString()}`, change: '+0.0%', trend: 'up', icon: DollarSign },
+            { name: 'Total Orders', value: analytics.stats.totalOrders.toString(), change: '+0.0%', trend: 'up', icon: ShoppingBag },
+            { name: 'Active Customers', value: analytics.stats.activeCustomers.toString(), change: '+0.0%', trend: 'up', icon: Users },
+            { name: 'Conversion Rate', value: '3.4%', change: '+0.0%', trend: 'up', icon: TrendingUp }, // Currently mocked
+          ].map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div key={stat.name} className="bg-white p-6 rounded-md border border-gray-200">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-2 bg-blue-50 rounded-md">
+                    <Icon className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <span className={`flex items-center text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.change}
+                    {stat.trend === 'up' ? <ArrowUpRight className="w-4 h-4 ml-1" /> : <ArrowDownRight className="w-4 h-4 ml-1" />}
+                  </span>
+                </div>
+                <h3 className="text-gray-500 text-sm font-medium mb-1">{stat.name}</h3>
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+              </div>
+            );
+          })
+        )}
       </div>
 
       <div className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -243,8 +245,9 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
             <h3 className="font-bold text-gray-900">Recent Orders</h3>
             <button className="text-sm text-blue-600 hover:text-blue-700 font-medium" onClick={() => setCurrentView('admin-orders')}>View All</button>
           </div>
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto w-full relative">
+            <div className="min-w-full inline-block align-middle">
+              <table className="min-w-full text-sm text-left">
               <thead className="bg-gray-50 text-gray-500 font-medium whitespace-nowrap">
                 <tr>
                   <th className="px-6 py-4">Order ID</th>
@@ -256,7 +259,18 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 whitespace-nowrap">
-                {analytics.recentOrders.length > 0 ? analytics.recentOrders.map((order: any) => (
+                {isLoadingAnalytics ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                        <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+                        <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
+                        <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
+                        <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+                        <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded-full w-20"></div></td>
+                        <td className="px-6 py-4"></td>
+                    </tr>
+                  ))
+                ) : analytics.recentOrders.length > 0 ? analytics.recentOrders.map((order: any) => (
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900">{order.orderNumber}</td>
                     <td className="px-6 py-4 text-gray-600">{order.firstName} {order.lastName}</td>
@@ -271,7 +285,7 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="text-gray-400 hover:text-gray-900">
+                      <button onClick={() => setCurrentView('admin-orders')} className="text-gray-400 hover:text-gray-900">
                         <MoreHorizontal className="w-5 h-5" />
                       </button>
                     </td>
@@ -283,26 +297,7 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
                 )}
               </tbody>
             </table>
-          </div>
-          <div className="md:hidden flex flex-col divide-y divide-gray-200">
-            {recentOrders.map((order) => (
-              <div key={order.id} className="p-4 flex flex-col gap-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-900">{order.id}</span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        ${order.status === 'Delivered' ? 'bg-green-100 text-green-800' : 
-                          order.status === 'Processing' ? 'bg-blue-100 text-blue-800' : 
-                          'bg-gray-100 text-gray-800'}`}>
-                    {order.status}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">{order.customer}</span>
-                  <span className="font-medium text-gray-900">{order.total}</span>
-                </div>
-                <div className="text-xs text-gray-500">{order.date}</div>
-              </div>
-            ))}
+            </div>
           </div>
         </div>
 
@@ -314,9 +309,6 @@ export function AdminDashboard({ currentView, setCurrentView }: AdminDashboardPr
           </div>
           <h3 className="font-bold text-gray-900 mb-2">Sales Target</h3>
           <p className="text-sm text-gray-500 mb-6">You've reached 75% of your sales goal for this month.</p>
-          <button className="w-full py-2 bg-gray-50 text-gray-900 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
-            View Details
-          </button>
         </div>
       </div>
     </AdminLayout>

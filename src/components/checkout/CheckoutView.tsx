@@ -41,6 +41,11 @@ export const CheckoutView = React.memo(function CheckoutView({ setCurrentView, c
   const total = subtotal + shipping;
 
   const handleCheckout = async () => {
+    if (!formData.email || !formData.firstName || !formData.lastName || !formData.phone) {
+      setCheckoutMessage({ type: 'error', text: 'Please fill in all required fields.' });
+      return;
+    }
+
     setIsProcessing(true);
     setCheckoutMessage(null);
     try {
@@ -218,7 +223,7 @@ export const CheckoutView = React.memo(function CheckoutView({ setCurrentView, c
               {cartItems.map((item) => (
                 <div key={item.id} className="flex gap-4 items-center">
                   <div className="w-16 h-16 bg-white border border-gray-200 rounded p-1 flex-shrink-0 relative">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply p-1" />
+                    <img src={item.image || undefined} alt={item.name} className="w-full h-full object-contain mix-blend-multiply p-1" />
                     <span className="absolute -top-2 -right-2 bg-gray-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
                       {item.quantity}
                     </span>

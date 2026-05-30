@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, createContext, useContext } from 'react';
 import { ViewType } from '../../types';
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut, Search, Bell, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Search, Bell, Menu, X } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -8,10 +8,20 @@ interface AdminLayoutProps {
   setCurrentView: (view: ViewType) => void;
 }
 
+const ToastContext = createContext<{ showToast: (msg: string) => void }>({ showToast: () => {} });
+
+export const useAdminToast = () => useContext(ToastContext);
+
 export function AdminLayout({ children, currentView, setCurrentView }: AdminLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, view: 'admin-dashboard' },
@@ -20,7 +30,8 @@ export function AdminLayout({ children, currentView, setCurrentView }: AdminLayo
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full">
+    <ToastContext.Provider value={{ showToast }}>
+      <div className="min-h-screen bg-gray-50 w-full">
       {/* Mobile backdrop */}
       <div 
         className={`fixed inset-0 bg-gray-900/50 z-20 md:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
@@ -156,8 +167,14 @@ export function AdminLayout({ children, currentView, setCurrentView }: AdminLayo
         {/* Page Content */}
         <div className="flex-1 p-4 sm:p-8 w-full max-w-7xl mx-auto min-w-0">
           {children}
+          {toastMessage && (
+            <div className="fixed bottom-4 right-4 z-50 bg-gray-900 text-white px-4 py-3 rounded-md shadow-lg font-medium text-sm transition-opacity duration-300">
+              {toastMessage}
+            </div>
+          )}
         </div>
       </main>
-    </div>
+      </div>
+    </ToastContext.Provider>
   );
 }

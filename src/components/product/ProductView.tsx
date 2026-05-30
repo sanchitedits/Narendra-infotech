@@ -15,14 +15,22 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
   const { products } = useData();
   const [qty, setQty] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [wishlist, setWishlist] = useState<Record<number, boolean>>({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     'Specifications': true,
   });
+
+  const toggleWishlist = (e: React.MouseEvent, productId: number) => {
+    e.stopPropagation();
+    setWishlist(prev => ({ ...prev, [productId]: !prev[productId] }));
+  };
 
   React.useEffect(() => {
     if (currentProduct) {
         setActiveImageIndex(0);
         setQty(1);
+        setSelectedVariant(currentProduct.variants && currentProduct.variants.length > 0 ? currentProduct.variants[0] : null);
     }
   }, [currentProduct?.id]);
 
@@ -69,13 +77,13 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  src={images[activeImageIndex]} 
+                  src={images[activeImageIndex] || undefined} 
                   alt={`${currentProduct.name} ${activeImageIndex}`}
                   className="w-full h-full object-contain mix-blend-multiply transform-gpu duration-700 ease-in-out cursor-grab active:cursor-grabbing hover:scale-105 will-change-transform"
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.2}
-                  onDragEnd={(e, { offset, velocity }) => {
+                  onDragEnd={(_e, { offset, velocity }) => {
                     const swipe = swipePower(offset.x, velocity.x);
                     if (swipe < -swipeConfidenceThreshold) {
                       handleNext();
@@ -107,7 +115,7 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
                 className={`aspect-square p-2 rounded-md bg-white border-2 transition-colors ${i === activeImageIndex ? 'border-blue-600' : 'border-gray-100 hover:border-gray-300 opacity-70 hover:opacity-100'} cursor-pointer`}
               >
                   <img 
-                  src={img} 
+                  src={img || undefined} 
                   alt={`${currentProduct.name} ${i}`}
                   className="w-full h-full object-contain mix-blend-multiply"
                 />
@@ -137,10 +145,14 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
 
           {currentProduct.variants && currentProduct.variants.length > 0 && (
             <div className="mb-6">
-              <h4 className="text-sm font-semibold text-gray-900 mb-3">Variant:</h4>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Variant: {selectedVariant}</h4>
               <div className="flex flex-wrap gap-3">
                 {currentProduct.variants.map((variant, idx) => (
-                  <button key={idx} className="px-4 py-2 border border-gray-200 rounded text-sm text-gray-700 hover:border-gray-900 transition-colors bg-white">
+                  <button 
+                    key={idx} 
+                    onClick={() => setSelectedVariant(variant)}
+                    className={`px-4 py-2 border rounded text-sm transition-colors ${selectedVariant === variant ? 'border-gray-900 text-gray-900 font-medium bg-gray-50' : 'border-gray-200 text-gray-700 hover:border-gray-900 bg-white'}`}
+                  >
                     {variant}
                   </button>
                 ))}
@@ -241,21 +253,24 @@ export const ProductView = React.memo(function ProductView({ setCurrentView, cur
       <div className="mt-24 pt-16 border-t border-gray-100">
         <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-10">You May Also Like</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.filter(p => p.id !== currentProduct.id).map((product) => (
+          {products.filter(p => p.id !== currentProduct.id).slice(0, 4).map((product) => (
             <div key={product.id} className="group cursor-pointer flex flex-col relative w-full" onClick={() => viewProduct(product.id)}>
               <div className="w-full aspect-square bg-[#f0f2f5] rounded-md overflow-hidden relative mb-4 hover:shadow-[0_4px_20px_rgb(0,0,0,0.05)] transition-shadow duration-300">
-                <button className="absolute top-4 right-4 text-gray-400 hover:text-red-500 z-10 transition-colors">
-                  <Heart className="w-5 h-5 fill-current border-none" />
+                <button 
+                  className={`absolute top-4 right-4 z-10 transition-colors ${wishlist[product.id] ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                  onClick={(e) => toggleWishlist(e, product.id)}
+                >
+                  <Heart className={`w-5 h-5 border-none ${wishlist[product.id] ? 'fill-current' : ''}`} />
                 </button>
                 <img 
-                  src={product.image} 
+                  src={product.image || undefined} 
                   alt={product.name}
                   className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transform transition-transform duration-500 ease-out"
                   loading="lazy"
                 />
                 <div className="absolute inset-x-0 bottom-4 translate-y-[150%] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transform transition-all duration-300 ease-out flex justify-center px-4 z-20">
                   <button 
-                    onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+                    onClick={(e) => { e.stopPropagation(); addToCart(product, 1); }}
                     className="bg-black/90 backdrop-blur text-white font-medium rounded py-3 px-6 text-sm hover:bg-black active:scale-95 transition-all w-full shadow-lg"
                   >
                     Quick Add

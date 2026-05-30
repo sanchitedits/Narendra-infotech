@@ -62,7 +62,7 @@ export const CartDrawer = React.memo(function CartDrawer({ isOpen, setIsOpen, ca
               {cartItems.map(item => (
                 <div key={item.id} className="flex gap-4">
                   <div className="w-20 h-20 bg-white border border-gray-100 rounded p-2 flex-shrink-0 cursor-pointer hover:border-gray-300 transition-colors" onClick={() => { setIsOpen(false); viewProduct(item.id); }}>
-                    <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply transform-gpu transition-transform hover:scale-105 duration-300 will-change-transform" />
+                    <img src={item.image || undefined} alt={item.name} className="w-full h-full object-contain mix-blend-multiply transform-gpu transition-transform hover:scale-105 duration-300 will-change-transform" />
                   </div>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>

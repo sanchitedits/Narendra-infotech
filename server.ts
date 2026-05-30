@@ -136,9 +136,9 @@ async function startServer() {
            for (const item of items) {
                await db.insert(schema.orderItems).values({
                    orderId: newOrder.id,
-                   productId: item.product.id,
+                   productId: item.id,
                    quantity: item.quantity,
-                   price: item.product.price
+                   price: String(item.price).replace(/[^0-9.]/g, '') || "0"
                });
            }
         } catch (e) {
@@ -359,6 +359,90 @@ async function startServer() {
     });
   });
 
+  // Delete Product
+  app.delete('/api/products/:id', async (req, res) => {
+    try {
+      const db = getDb();
+      if (!db) {
+         return res.status(400).json({ success: false, message: 'Database not connected' });
+      }
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+          return res.status(400).json({ success: false, message: 'Invalid ID' });
+      }
+      
+      // Delete child references first
+      await db.delete(schema.orderItems).where(eq(schema.orderItems.productId, productId));
+      await db.delete(schema.digitalAssets).where(eq(schema.digitalAssets.productId, productId));
+      await db.delete(schema.variants).where(eq(schema.variants.productId, productId));
+      await db.delete(schema.products).where(eq(schema.products.id, productId));
+      
+      res.json({ success: true, message: 'Product deleted successfully' });
+    } catch (error) {
+       console.error(error);
+       res.status(500).json({ success: false, error: 'Failed to delete product' });
+    }
+  });
+
+  // Update Product
+  app.put('/api/products/:id', async (req, res) => {
+    try {
+      const db = getDb();
+      if (!db) {
+         return res.status(400).json({ success: false, message: 'Database not connected' });
+      }
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+          return res.status(400).json({ success: false, message: 'Invalid ID' });
+      }
+      
+      const { name, price, stock, description, image } = req.body;
+      
+      await db.update(schema.products).set({
+          name,
+          price: price ? String(price) : "0",
+          stock: stock || 0,
+          description: description || '',
+          image: image || null
+      }).where(eq(schema.products.id, productId));
+      
+      res.json({ success: true, message: 'Product updated successfully' });
+    } catch (error) {
+       console.error(error);
+       res.status(500).json({ success: false, error: 'Failed to update product' });
+    }
+  });
+
+  // Add Product
+  app.post('/api/products', async (req, res) => {
+    try {
+      const db = getDb();
+      if (!db) {
+         return res.status(400).json({ success: false, message: 'Database not connected' });
+      }
+      
+      const { name, price, stock, description, image, categoryId } = req.body;
+      if (!name) {
+         return res.status(400).json({ success: false, message: 'Name is required' });
+      }
+      
+      const [newProduct] = await db.insert(schema.products).values({
+          name,
+          price: price ? String(price) : "0",
+          stock: stock || 0,
+          description: description || '',
+          image: image || null,
+          categoryId: categoryId || null,
+          status: 'active'
+      }).returning();
+      
+      res.json({ success: true, product: newProduct });
+    } catch (error) {
+       console.error(error);
+       res.status(500).json({ success: false, error: 'Failed to add product' });
+    }
+  });
+
   // Get Products
   app.get('/api/products', async (req, res) => {
     try {
@@ -366,11 +450,15 @@ async function startServer() {
       if (db) {
          const productsData = await db.select().from(schema.products);
          const variantsData = await db.select().from(schema.variants);
+         const categoriesData = await db.select().from(schema.categories);
          
          const enrichedProducts = productsData.map(p => {
              const productVariants = variantsData.filter(v => v.productId === p.id);
+             const categoryRecord = categoriesData.find(c => c.id === p.categoryId);
              return {
                  ...p,
+                 image: p.image || null, // null avoids React's empty string warning on src
+                 category: categoryRecord ? categoryRecord.name : 'Uncategorized',
                  // append variants string array based on title
                  variants: productVariants.map(v => v.title)
              };
@@ -448,6 +536,84 @@ async function startServer() {
       }
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  });
+
+  // Update Order Status
+  app.put('/api/orders/:id', async (req, res) => {
+    try {
+      const db = getDb();
+      if (!db) {
+         return res.status(400).json({ success: false, message: 'Database not connected' });
+      }
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+          return res.status(400).json({ success: false, message: 'Invalid ID' });
+      }
+      
+      const { status } = req.body;
+      
+      await db.update(schema.orders).set({
+          status
+      }).where(eq(schema.orders.id, orderId));
+      
+      res.json({ success: true, message: 'Order updated successfully' });
+    } catch (error) {
+       console.error(error);
+       res.status(500).json({ success: false, error: 'Failed to update order' });
+    }
+  });
+
+  // Delete Order
+  app.delete('/api/orders/:id', async (req, res) => {
+    try {
+      const db = getDb();
+      if (!db) {
+         return res.status(400).json({ success: false, message: 'Database not connected' });
+      }
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+          return res.status(400).json({ success: false, message: 'Invalid ID' });
+      }
+      
+      await db.delete(schema.orderItems).where(eq(schema.orderItems.orderId, orderId));
+      await db.delete(schema.orders).where(eq(schema.orders.id, orderId));
+      
+      res.json({ success: true, message: 'Order deleted successfully' });
+    } catch (error) {
+       console.error(error);
+       res.status(500).json({ success: false, error: 'Failed to delete order' });
+    }
+  });
+
+  // Get Order Items
+  app.get('/api/orders/:id/items', async (req, res) => {
+    try {
+      const db = getDb();
+      if (db) {
+        const orderId = parseInt(req.params.id);
+        if (isNaN(orderId)) {
+          return res.status(400).json({ success: false, message: 'Invalid ID' });
+        }
+        
+        const items = await db.select({
+           id: schema.orderItems.id,
+           quantity: schema.orderItems.quantity,
+           price: schema.orderItems.price,
+           productName: schema.products.name,
+           productImage: schema.products.image
+        })
+        .from(schema.orderItems)
+        .leftJoin(schema.products, eq(schema.orderItems.productId, schema.products.id))
+        .where(eq(schema.orderItems.orderId, orderId));
+        
+        res.json({ success: true, items });
+      } else {
+         res.json({ success: true, items: [] });
+      }
+    } catch (error) {
+       console.error(error);
+       res.status(500).json({ success: false, error: 'Failed to fetch order items' });
     }
   });
 

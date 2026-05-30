@@ -27,6 +27,7 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
      if (products.length > 0 && selectedProductId === null) {
@@ -41,6 +42,11 @@ export default function App() {
   const viewProduct = useCallback((id: number) => {
     setSelectedProductId(id);
     setCurrentView('product');
+  }, []);
+
+  const viewCategory = useCallback((category: string | null = null) => {
+    setSelectedCategory(category);
+    setCurrentView('category');
   }, []);
 
   const updateQuantity = useCallback((id: number, delta: number) => {
@@ -92,6 +98,7 @@ export default function App() {
         setCurrentView={setCurrentView} 
         cartItemsCount={cartItemsCount} 
         setIsCartOpen={setIsCartOpen}
+        viewCategory={viewCategory}
       />
 
       <main className="flex-grow bg-white rounded-b-[40px] shadow-sm overflow-hidden mb-safe">
@@ -105,8 +112,8 @@ export default function App() {
             className="w-full"
             style={{ willChange: 'opacity, transform' }}
           >
-            {currentView === 'home' && <HomeView setCurrentView={setCurrentView} addToCart={addToCart} viewProduct={viewProduct} />}
-            {currentView === 'category' && <CategoryView setCurrentView={setCurrentView} addToCart={addToCart} viewProduct={viewProduct} />}
+            {currentView === 'home' && <HomeView setCurrentView={setCurrentView} addToCart={addToCart} viewProduct={viewProduct} viewCategory={viewCategory} />}
+            {currentView === 'category' && <CategoryView setCurrentView={setCurrentView} addToCart={addToCart} viewProduct={viewProduct} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />}
             {currentView === 'product' && <ProductView setCurrentView={setCurrentView} currentProduct={currentProduct} addToCart={addToCart} viewProduct={viewProduct} />}
             {currentView === 'cart' && <CartView setCurrentView={setCurrentView} cartItems={cartItems} updateQuantity={updateQuantity} removeItem={removeItem} viewProduct={viewProduct} />}
             {currentView === 'checkout' && <CheckoutView setCurrentView={setCurrentView} cartItems={cartItems} />}

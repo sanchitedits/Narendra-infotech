@@ -8,9 +8,10 @@ interface HeaderProps {
   setCurrentView: (view: ViewType) => void;
   cartItemsCount: number;
   setIsCartOpen: (isOpen: boolean) => void;
+  viewCategory?: (category: string | null) => void;
 }
 
-export const Header = React.memo(function Header({ currentView, setCurrentView, cartItemsCount, setIsCartOpen }: HeaderProps) {
+export const Header = React.memo(function Header({ currentView, setCurrentView, cartItemsCount, setIsCartOpen, viewCategory }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   React.useEffect(() => {
@@ -25,7 +26,11 @@ export const Header = React.memo(function Header({ currentView, setCurrentView, 
   }, [isMobileMenuOpen]);
 
   const navigateTo = (view: ViewType) => {
-    setCurrentView(view);
+    if (view === 'category' && viewCategory) {
+      viewCategory(null);
+    } else {
+      setCurrentView(view);
+    }
     setIsMobileMenuOpen(false);
   };
 
@@ -101,15 +106,22 @@ export const Header = React.memo(function Header({ currentView, setCurrentView, 
               
               <nav className="hidden lg:flex ml-8 gap-8">
                 <button onClick={() => setCurrentView('home')} className={`text-sm font-medium transition-colors ${currentView === 'home' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} py-2`}>Home</button>
-                <button onClick={() => setCurrentView('category')} className={`text-sm font-medium transition-colors ${currentView === 'category' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} py-2`}>Shop</button>
+                <button onClick={() => viewCategory ? viewCategory(null) : setCurrentView('category')} className={`text-sm font-medium transition-colors ${currentView === 'category' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} py-2`}>Shop</button>
                 <button onClick={() => setCurrentView('about')} className={`text-sm font-medium transition-colors ${currentView === 'about' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} py-2`}>About</button>
               </nav>
             </div>
 
             <div className="flex items-center gap-6">
-              <button className="text-gray-900 hover:bg-gray-100 p-2 rounded-full transition-colors relative">
-                <Search className="w-5 h-5" />
-              </button>
+              <div className="relative flex items-center group">
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  className="w-0 opacity-0 group-hover:w-48 group-hover:opacity-100 group-hover:px-4 transition-all duration-300 bg-gray-100 border-none rounded-full h-10 text-sm focus:outline-none focus:ring-1 focus:ring-gray-300 absolute right-10"
+                />
+                <button className="text-gray-900 hover:bg-gray-100 p-2 rounded-full transition-colors relative z-10">
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
               <button onClick={() => setIsCartOpen(true)} className="text-gray-900 relative p-2 rounded-full hover:bg-gray-100 transition-colors active:scale-95">
                 <ShoppingCart className="w-5 h-5" />
                 {cartItemsCount > 0 && (

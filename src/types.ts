@@ -2,13 +2,17 @@ export interface Product {
   id: number;
   name: string;
   price: string;
+  originalPrice?: string;
+  vendor?: string;
   category: string;
+  categoryId?: number;
   rating: number;
   image: string;
   description?: string;
   specifications?: Record<string, string>;
   inTheBox?: string[];
   variants?: string[];
+  tags?: string | string[];
   stock?: number;
   status?: string;
 }
