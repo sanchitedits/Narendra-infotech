@@ -680,7 +680,7 @@ async function startServer() {
       const systemInstruction = cachedBusinessInfo + productContext;
       
       const chat = ai.chats.create({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.0-flash",
         config: {
           systemInstruction: systemInstruction,
         },
